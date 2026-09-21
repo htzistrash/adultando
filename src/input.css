@@ -28,6 +28,12 @@
 }
 
 @layer components {
+  /* Header fixo: respeita a barra de status em telas com notch.
+     Em navegador comum env() resolve para 0, então não muda nada. */
+  .site-header {
+    top: env(safe-area-inset-top, 0px);
+  }
+
   /* Grifo de marca-texto atrás da palavra destacada */
   .grifo {
     background-image: linear-gradient(
