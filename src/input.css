@@ -43,4 +43,143 @@
     );
     padding: 0 0.12em;
   }
+
+  /* ── Texto em gradiente animado ────────────────────────────
+     Inspirado no wordmark da monday. Percorre uva → roxo, as
+     duas únicas cores da paleta com contraste suficiente sobre
+     o fundo claro do badge (4,8:1 e 12,5:1). Azul e água ficam
+     em 2,6:1 e 1,9:1 aqui, então não entram no ciclo.         */
+  .texto-arcoiris {
+    background-image: linear-gradient(
+      90deg,
+      var(--color-uva),
+      var(--color-roxo),
+      var(--color-uva),
+      var(--color-roxo),
+      var(--color-uva)
+    );
+    background-size: 250% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: arcoiris 6s linear infinite;
+  }
+
+  @keyframes arcoiris {
+    from { background-position: 0% 50%; }
+    to   { background-position: -250% 50%; }
+  }
+
+  /* ── Caixa que troca de palavra no título ──────────────────
+     A largura acompanha a palavra atual; a palavra gira no
+     eixo X ao entrar e sair.                                  */
+  .flip-caixa {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    vertical-align: baseline;
+    max-width: 100%;
+    /* A largura vem do JS e mede só o texto, então o padding
+       precisa somar por fora. */
+    box-sizing: content-box;
+    /* Um pouco menor que o resto do título: sobra folga para a
+       palavra mais longa caber na tela do celular. */
+    font-size: 0.82em;
+    padding: 0.08em 0.32em;
+    border-radius: 0.4em;
+    background-color: var(--color-nevoa);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-roxo) 12%, transparent);
+    transition: width 420ms cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: width;
+  }
+
+  .flip-palavra {
+    display: inline-block;
+    white-space: nowrap;
+    color: var(--color-uva);
+    transform-origin: center bottom;
+    transition:
+      transform 300ms cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 300ms ease;
+  }
+
+  .flip-palavra[data-estado="saindo"] {
+    transform: rotateX(-88deg) translateY(-0.18em);
+    opacity: 0;
+  }
+
+  .flip-palavra[data-estado="entrando"] {
+    transform: rotateX(88deg) translateY(0.18em);
+    opacity: 0;
+  }
+
+  /* Medidor invisível usado para calcular a largura de cada palavra */
+  .flip-medidor {
+    position: absolute;
+    visibility: hidden;
+    white-space: nowrap;
+    pointer-events: none;
+    left: -9999px;
+    top: 0;
+  }
+
+  /* ── Vidro fosco com fundo em movimento ────────────────────
+     Os borrões giram atrás do painel; o backdrop-filter do
+     painel é que produz o vidro.                              */
+  .vidro {
+    background-color: color-mix(in srgb, #fff 55%, transparent);
+    -webkit-backdrop-filter: blur(28px) saturate(150%);
+    backdrop-filter: blur(28px) saturate(150%);
+    box-shadow:
+      inset 0 0 0 1px color-mix(in srgb, #fff 75%, transparent),
+      0 24px 60px -30px color-mix(in srgb, var(--color-roxo) 45%, transparent);
+  }
+
+  .borrao {
+    position: absolute;
+    border-radius: 9999px;
+    filter: blur(52px);
+    will-change: transform;
+  }
+
+  .borrao-1 { animation: deriva-1 19s ease-in-out infinite; }
+  .borrao-2 { animation: deriva-2 23s ease-in-out infinite; }
+  .borrao-3 { animation: deriva-3 27s ease-in-out infinite; }
+
+  @keyframes deriva-1 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33%      { transform: translate(90px, 50px) scale(1.2); }
+    66%      { transform: translate(-40px, 80px) scale(0.9); }
+  }
+
+  @keyframes deriva-2 {
+    0%, 100% { transform: translate(0, 0) scale(1.1); }
+    33%      { transform: translate(-80px, -40px) scale(0.85); }
+    66%      { transform: translate(60px, -70px) scale(1.25); }
+  }
+
+  @keyframes deriva-3 {
+    0%, 100% { transform: translate(0, 0) scale(0.95); }
+    50%      { transform: translate(70px, -60px) scale(1.3); }
+  }
+}
+
+/* Quem pediu menos movimento no sistema não recebe nenhuma animação. */
+@media (prefers-reduced-motion: reduce) {
+  .texto-arcoiris,
+  .borrao-1,
+  .borrao-2,
+  .borrao-3 {
+    animation: none !important;
+  }
+
+  .texto-arcoiris {
+    background-position: 0% 50%;
+  }
+
+  .flip-caixa,
+  .flip-palavra {
+    transition: none !important;
+  }
 }
