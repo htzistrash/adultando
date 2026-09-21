@@ -1,0 +1,40 @@
+@import "tailwindcss";
+
+@source "../index.html";
+
+/* ── Paleta oficial Adultando ──────────────────────────────
+   Única fonte de cor do projeto. Nada fora desta lista.      */
+@theme {
+  --color-roxo:    #3E1F7A; /* roxo profundo — fundos escuros, títulos */
+  --color-uva:     #7B3FE4; /* roxo vivo — marca, CTAs                */
+  --color-azul:    #1E96F0; /* azul — apoios, destaques               */
+  --color-agua:    #2BC4B0; /* verde-água — grifos, acentos           */
+  --color-nevoa:   #E9EAF0; /* cinza claro — fundos, bordas           */
+  --color-grafite: #2D2D2F; /* quase preto — texto corrido            */
+
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-display: "Outfit", "Inter", ui-sans-serif, system-ui, sans-serif;
+
+  --radius-4xl: 2rem;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+@layer components {
+  /* Grifo de marca-texto atrás da palavra destacada */
+  .grifo {
+    background-image: linear-gradient(
+      to top,
+      var(--color-agua) 0 38%,
+      transparent 38%
+    );
+    padding: 0 0.12em;
+  }
+}
