@@ -107,11 +107,14 @@
               Quero receber
             </button>
           </div>
-          <p class="msg-erro mt-2.5 hidden pl-5 text-sm font-medium text-uva">Digite um e-mail válido pra gente te avisar.</p>
-          <p class="msg-ok mt-3 hidden rounded-2xl bg-agua/20 px-5 py-3 text-sm font-semibold text-roxo">
+          <p class="msg-erro mt-2.5 hidden pl-5 text-sm font-medium text-uva" role="alert">Digite um e-mail válido pra gente te avisar.</p>
+          <p class="msg-ok mt-3 hidden rounded-2xl bg-agua/20 px-5 py-3 text-sm font-semibold text-roxo" role="status">
             Pronto! Você está na lista. 💜
           </p>
-          <p class="mt-3 pl-5 text-[13px] text-grafite/55">Conteúdo prático, sem spam. Você sai quando quiser.</p>
+          <p class="mt-3 pl-5 text-[13px] leading-relaxed text-grafite/55">
+            Ao entrar na lista você aceita receber e-mails do Adultando com as trilhas e os
+            lembretes de prazo. Nada de spam e nenhum repasse do seu e-mail. Você sai quando quiser.
+          </p>
         </form>
       </div>
 
@@ -489,11 +492,14 @@
               Entrar na lista
             </button>
           </div>
-          <p class="msg-erro mt-2.5 hidden pl-5 text-sm font-medium text-uva">Digite um e-mail válido pra gente te avisar.</p>
-          <p class="msg-ok mt-3 hidden rounded-2xl bg-agua/30 px-5 py-3 text-sm font-semibold text-roxo">
+          <p class="msg-erro mt-2.5 hidden pl-5 text-sm font-medium text-uva" role="alert">Digite um e-mail válido pra gente te avisar.</p>
+          <p class="msg-ok mt-3 hidden rounded-2xl bg-agua/30 px-5 py-3 text-sm font-semibold text-roxo" role="status">
             Pronto! Você está na lista. 💜
           </p>
-          <p class="mt-3 pl-5 text-center text-[13px] text-grafite/55 sm:text-left">Sem spam. Cancele quando quiser.</p>
+          <p class="mt-3 pl-5 text-center text-[13px] leading-relaxed text-grafite/55 sm:text-left">
+            Ao entrar na lista você aceita receber e-mails do Adultando. Nada de spam e nenhum
+            repasse do seu e-mail. Você sai quando quiser.
+          </p>
         </form>
       </div>
       </div>
@@ -594,37 +600,107 @@
     });
   })();
 
-  // Captura de e-mail: visual apenas, ainda sem backend.
-  // Guarda localmente pra não perder o lead enquanto a integração não existe.
-  document.querySelectorAll('.form-lead').forEach(function (form) {
-    form.addEventListener('submit', function (e) {
-      e.preventDefault();
+  /* ── Captura de e-mail ──────────────────────────────────────
+     Preencha CAPTURA abaixo com os dados do seu provedor.
+     Enquanto "id" estiver vazio, o formulário continua funcionando
+     visualmente e guarda os e-mails no navegador, sem enviar nada.
 
-      var input = form.querySelector('input[type="email"]');
-      var erro  = form.querySelector('.msg-erro');
-      var ok    = form.querySelector('.msg-ok');
-      var email = input.value.trim();
+     Kit (ex-ConvertKit): provedor 'kit', id = número do formulário
+       que aparece em app.kit.com > Grow > Landing Pages & Forms,
+       na URL /forms/1234567/edit  ->  id: '1234567'
 
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
-        erro.classList.remove('hidden');
-        ok.classList.add('hidden');
-        input.focus();
-        return;
+     Formspree: provedor 'formspree', id = código do endpoint
+       https://formspree.io/f/abcdwxyz  ->  id: 'abcdwxyz'          */
+  var CAPTURA = {
+    provedor: 'kit',
+    id: ''
+  };
+
+  (function () {
+    function envia(email) {
+      if (!CAPTURA.id) {
+        // Sem provedor configurado: guarda no navegador para não perder
+        // nada durante os testes.
+        try {
+          var leads = JSON.parse(localStorage.getItem('adultando:leads') || '[]');
+          leads.push({ email: email, em: new Date().toISOString() });
+          localStorage.setItem('adultando:leads', JSON.stringify(leads));
+        } catch (_) { /* modo privado ou storage bloqueado */ }
+        console.warn('Adultando: CAPTURA.id vazio, e-mail guardado só no navegador.');
+        return Promise.resolve();
       }
 
-      erro.classList.add('hidden');
+      if (CAPTURA.provedor === 'kit') {
+        var dados = new FormData();
+        dados.append('email_address', email);
+        return fetch('https://app.convertkit.com/forms/' + CAPTURA.id + '/subscriptions', {
+          method: 'POST',
+          body: dados
+        }).then(confere);
+      }
 
-      try {
-        var leads = JSON.parse(localStorage.getItem('adultando:leads') || '[]');
-        leads.push({ email: email, em: new Date().toISOString() });
-        localStorage.setItem('adultando:leads', JSON.stringify(leads));
-      } catch (_) { /* modo privado / storage bloqueado */ }
+      if (CAPTURA.provedor === 'formspree') {
+        return fetch('https://formspree.io/f/' + CAPTURA.id, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify({ email: email })
+        }).then(confere);
+      }
 
-      ok.classList.remove('hidden');
-      input.value = '';
-      input.blur();
+      return Promise.reject(new Error('Provedor desconhecido: ' + CAPTURA.provedor));
+    }
+
+    function confere(r) {
+      if (!r.ok) throw new Error('Resposta ' + r.status);
+      return r;
+    }
+
+    document.querySelectorAll('.form-lead').forEach(function (form) {
+      var input  = form.querySelector('input[type="email"]');
+      var botao  = form.querySelector('button[type="submit"]');
+      var erro   = form.querySelector('.msg-erro');
+      var ok     = form.querySelector('.msg-ok');
+      var rotulo = botao.textContent.trim();
+
+      function mostra(el, texto) {
+        [erro, ok].forEach(function (m) { m.classList.add('hidden'); });
+        if (!el) return;
+        if (texto) el.textContent = texto;
+        el.classList.remove('hidden');
+      }
+
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        var email = input.value.trim();
+
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
+          mostra(erro, 'Digite um e-mail válido pra gente te avisar.');
+          input.focus();
+          return;
+        }
+
+        mostra(null);
+        botao.disabled = true;
+        botao.textContent = 'Enviando...';
+
+        envia(email)
+          .then(function () {
+            mostra(ok, 'Pronto! Você está na lista. 💜');
+            input.value = '';
+            input.blur();
+          })
+          .catch(function (err) {
+            console.error('Adultando: falha ao enviar o e-mail.', err);
+            mostra(erro, 'Não consegui enviar agora. Tenta de novo em instantes.');
+          })
+          .finally(function () {
+            botao.disabled = false;
+            botao.textContent = rotulo;
+          });
+      });
     });
-  });
+  })();
 </script>
 
 </body>

@@ -52,18 +52,53 @@ Notas de contraste, já aplicadas na página:
 
 ## Captação de e-mail
 
-Os dois formulários (hero e CTA final) compartilham a classe `.form-lead`.
-Hoje eles **não enviam para lugar nenhum**: validam o formato do e-mail,
-mostram o estado de sucesso e guardam em `localStorage` (`adultando:leads`)
-só para não perder nada durante os testes.
+Os dois formulários (hero e CTA final) compartilham a classe `.form-lead` e
+um único ponto de configuração, no `<script>` do fim do `index.html`:
 
-Para ligar de verdade, basta trocar o bloco do `submit` no final do
-`index.html` por um `fetch` para o serviço escolhido (Mailchimp, Brevo,
-ConvertKit, Formspree ou um endpoint próprio).
+```js
+var CAPTURA = {
+  provedor: 'kit',   // 'kit' ou 'formspree'
+  id: ''             // vazio = ainda não conectado
+};
+```
+
+Com `id` vazio o formulário funciona normalmente, mas só guarda os e-mails
+em `localStorage` (`adultando:leads`) e avisa no console. Assim a página
+continua demonstrável sem depender de conta em lugar nenhum.
+
+### Ligar no Kit (recomendado)
+
+Grátis até 10.000 inscritos, com envios ilimitados. O plano gratuito dá um
+formulário, que é exatamente o que a lista de espera precisa.
+
+1. Crie a conta em [kit.com](https://kit.com).
+2. **Grow > Landing Pages & Forms > New > Form > Inline**.
+3. Abra o formulário criado e olhe a URL:
+   `app.kit.com/forms/1234567/edit`. O número é o seu id.
+4. Preencha no `index.html`: `provedor: 'kit'`, `id: '1234567'`.
+5. Em **Settings > Incentive**, ligue o double opt-in. Além de limpar
+   e-mail errado, deixa o consentimento registrado, o que ajuda na LGPD.
+
+Os inscritos aparecem em **Subscribers**, com export em CSV.
+
+### Ligar no Formspree
+
+Mais simples, mas só recebe: não envia campanha e o plano gratuito para em
+50 envios por mês, sem export em CSV. Serve se você só quer o e-mail
+chegando na sua caixa por enquanto.
+
+1. Crie o form em [formspree.io](https://formspree.io).
+2. Copie o endpoint: `https://formspree.io/f/abcdwxyz`.
+3. Preencha: `provedor: 'formspree'`, `id: 'abcdwxyz'`.
+
+### Outro provedor
+
+`envia()` isola a chamada. Para Brevo, Mailchimp ou endpoint próprio, é
+adicionar um ramo ali com a URL e o formato de payload do serviço.
 
 ## Pendências
 
-- [ ] Conectar os formulários a um provedor de e-mail de verdade
-- [ ] Logo definitiva (hoje é um monograma tipográfico)
-- [ ] Política de privacidade / aviso de LGPD antes de captar de verdade
+- [ ] Preencher `CAPTURA.id` com o formulário do provedor escolhido
+- [ ] Trocar o relato placeholder (texto e foto) por um depoimento real
+- [ ] Página de política de privacidade, linkada no rodapé
 - [ ] Domínio + analytics
