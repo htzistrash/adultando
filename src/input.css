@@ -34,14 +34,64 @@
     top: env(safe-area-inset-top, 0px);
   }
 
-  /* Grifo de marca-texto atrás da palavra destacada */
-  .grifo {
-    background-image: linear-gradient(
-      to top,
-      var(--color-agua) 0 38%,
-      transparent 38%
+  /* ── Hero Highlight (Aceternity, em CSS puro) ──────────────
+     Malha de pontos apagada por padrão; perto do cursor os
+     pontos acendem em uva. A máscara radial segue --mx/--my,
+     atualizados no mousemove.                                 */
+  .malha-pontos,
+  .malha-pontos-acesa {
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' width='16' height='16' fill='none'%3E%3Ccircle fill='%23E9EAF0' cx='10' cy='10' r='2.5'/%3E%3C/svg%3E");
+  }
+
+  .malha-pontos-acesa {
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' width='16' height='16' fill='none'%3E%3Ccircle fill='%237B3FE4' cx='10' cy='10' r='2.5'/%3E%3C/svg%3E");
+    opacity: 0;
+    transition: opacity 300ms ease;
+    -webkit-mask-image: radial-gradient(
+      220px circle at var(--mx, 50%) var(--my, 50%),
+      #000 0%,
+      transparent 100%
     );
-    padding: 0 0.12em;
+    mask-image: radial-gradient(
+      220px circle at var(--mx, 50%) var(--my, 50%),
+      #000 0%,
+      transparent 100%
+    );
+  }
+
+  .hero-pontos:hover .malha-pontos-acesa {
+    opacity: 1;
+  }
+
+  /* Destaque que varre o texto da esquerda para a direita. */
+  .realce {
+    display: inline;
+    padding: 0 0.22em 0.06em;
+    border-radius: 0.3em;
+    /* Sem isto, a quebra de linha parte o gradiente ao meio e
+       cada pedaço fica com um trecho diferente da cor. */
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+    background-image: linear-gradient(90deg, var(--color-agua), var(--color-azul));
+    background-repeat: no-repeat;
+    background-position: left center;
+    background-size: 0% 100%;
+    animation: realce-varre 1.6s linear 0.5s forwards;
+  }
+
+  @keyframes realce-varre {
+    to { background-size: 100% 100%; }
+  }
+
+  /* Entrada do título: sobe, passa um pouco e assenta. */
+  .titulo-entra {
+    animation: titulo-entra 600ms cubic-bezier(0.4, 0, 0.2, 1) both;
+  }
+
+  @keyframes titulo-entra {
+    0%   { opacity: 0; transform: translateY(20px); }
+    70%  { opacity: 1; transform: translateY(-5px); }
+    100% { opacity: 1; transform: translateY(0); }
   }
 
   /* ── Texto em gradiente animado ────────────────────────────
@@ -68,60 +118,6 @@
   @keyframes arcoiris {
     from { background-position: 0% 50%; }
     to   { background-position: -250% 50%; }
-  }
-
-  /* ── Caixa que troca de palavra no título ──────────────────
-     A largura acompanha a palavra atual; a palavra gira no
-     eixo X ao entrar e sair.                                  */
-  .flip-caixa {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    vertical-align: baseline;
-    max-width: 100%;
-    /* A largura vem do JS e mede só o texto, então o padding
-       precisa somar por fora. */
-    box-sizing: content-box;
-    /* Um pouco menor que o resto do título: sobra folga para a
-       palavra mais longa caber na tela do celular. */
-    font-size: 0.82em;
-    padding: 0.08em 0.32em;
-    border-radius: 0.4em;
-    background-color: var(--color-nevoa);
-    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-roxo) 12%, transparent);
-    transition: width 420ms cubic-bezier(0.22, 1, 0.36, 1);
-    will-change: width;
-  }
-
-  .flip-palavra {
-    display: inline-block;
-    white-space: nowrap;
-    color: var(--color-uva);
-    transform-origin: center bottom;
-    transition:
-      transform 300ms cubic-bezier(0.22, 1, 0.36, 1),
-      opacity 300ms ease;
-  }
-
-  .flip-palavra[data-estado="saindo"] {
-    transform: rotateX(-88deg) translateY(-0.18em);
-    opacity: 0;
-  }
-
-  .flip-palavra[data-estado="entrando"] {
-    transform: rotateX(88deg) translateY(0.18em);
-    opacity: 0;
-  }
-
-  /* Medidor invisível usado para calcular a largura de cada palavra */
-  .flip-medidor {
-    position: absolute;
-    visibility: hidden;
-    white-space: nowrap;
-    pointer-events: none;
-    left: -9999px;
-    top: 0;
   }
 
   /* ── Vidro fosco com fundo em movimento ────────────────────
@@ -178,8 +174,16 @@
     background-position: 0% 50%;
   }
 
-  .flip-caixa,
-  .flip-palavra {
+  .realce {
+    animation: none !important;
+    background-size: 100% 100% !important;
+  }
+
+  .titulo-entra {
+    animation: none !important;
+  }
+
+  .malha-pontos-acesa {
     transition: none !important;
   }
 }
