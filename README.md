@@ -22,11 +22,30 @@ sem build, em qualquer hospedagem estática (GitHub Pages, Netlify, Vercel).
 ## Estrutura
 
 ```
-index.html              página inteira (uma só)
-src/input.css           entrada do Tailwind + paleta + classe .grifo
-assets/css/app.css      CSS compilado (gerado — não editar à mão)
-assets/img/             imagens
+index.html                 página inteira (uma só)
+src/input.css              entrada do Tailwind: paleta e efeitos
+assets/css/app.css         CSS compilado (gerado, não editar à mão)
+assets/img/                imagens
+scripts/build-artifact.py  gera a versão hospedada no claude.ai
+dist/                      saída do script (fora do versionamento)
 ```
+
+## Prévia hospedada no claude.ai
+
+Para mandar a página para alguém antes de ter domínio, dá para publicá-la
+como página hospedada no claude.ai. Ela não aceita o `index.html` como
+está: a plataforma injeta o próprio `<!doctype html>`, `<head>` e `<body>`,
+e não serve os `.css` relativos.
+
+```bash
+npm run build:artifact
+```
+
+O script monta `dist/artifact/` a partir do mesmo `index.html`: tira o
+invólucro, embute o CSS compilado e copia as imagens. Não existe uma
+segunda cópia da página para sair do ar de sincronia. Para publicar, use
+`dist/artifact/page.html` como página e os arquivos de
+`dist/artifact/assets/` como anexos.
 
 ## Paleta
 

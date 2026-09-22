@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "tailwindcss -i src/input.css -o assets/css/app.css --watch",
     "build": "tailwindcss -i src/input.css -o assets/css/app.css --minify",
-    "serve": "python3 -m http.server 8080"
+    "serve": "python3 -m http.server 8080",
+    "build:artifact": "npm run build && python3 scripts/build-artifact.py"
   },
   "repository": {
     "type": "git",
