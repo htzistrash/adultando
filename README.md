@@ -30,6 +30,32 @@ scripts/build-artifact.py  gera a versão hospedada no claude.ai
 dist/                      saída do script (fora do versionamento)
 ```
 
+## Colocar no ar
+
+O `netlify.toml` já deixa tudo configurado. No Netlify, **Add new site >
+Import an existing project > GitHub > adultando**: ele lê o arquivo e nem
+pergunta as configurações de build.
+
+```bash
+npm run build:site   # monta dist/site/ (igual ao que o Netlify publica)
+```
+
+`dist/site/` leva só o `index.html` e as imagens. `src/`, `scripts/`,
+`node_modules` e o README ficam de fora.
+
+### Domínio
+
+Em **Domain management > Add a custom domain**, informe `adultando.com.br`.
+Depois, no painel do registrador (Registro.br, para `.com.br`), aponte:
+
+| Tipo  | Nome | Valor                   |
+| ----- | ---- | ----------------------- |
+| A     | @    | `75.2.60.5`             |
+| CNAME | www  | `SEU-SITE.netlify.app`  |
+
+O certificado HTTPS o Netlify emite sozinho depois que o DNS propagar
+(de alguns minutos até 24h).
+
 ## Prévia hospedada no claude.ai
 
 Para mandar a página para alguém antes de ter domínio, dá para publicá-la

@@ -1,0 +1,30 @@
+# Deploy do site estático.
+# O build compila o Tailwind e monta dist/site/ apenas com o que vai pro ar:
+# o index.html e as imagens. Fonte, scripts e node_modules ficam de fora.
+
+[build]
+  command = "npm run build:site"
+  publish = "dist/site"
+
+[build.environment]
+  NODE_VERSION = "22"
+
+# O HTML nunca fica em cache: um deploy novo precisa aparecer na hora.
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    X-Frame-Options = "SAMEORIGIN"
+
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+# CSS e imagens têm nome estável, então cache curto pra não servir
+# arquivo velho depois de um deploy.
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=3600"

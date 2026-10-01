@@ -7,7 +7,8 @@
     "dev": "tailwindcss -i src/input.css -o assets/css/app.css --watch",
     "build": "tailwindcss -i src/input.css -o assets/css/app.css --minify",
     "serve": "python3 -m http.server 8080",
-    "build:artifact": "npm run build && python3 scripts/build-artifact.py"
+    "build:artifact": "npm run build && python3 scripts/build-artifact.py",
+    "build:site": "npm run build && rm -rf dist/site && mkdir -p dist/site && cp index.html dist/site/ && cp -R assets dist/site/"
   },
   "repository": {
     "type": "git",
