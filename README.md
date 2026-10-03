@@ -144,6 +144,5 @@ adicionar um ramo ali com a URL e o formato de payload do serviço.
 ## Pendências
 
 - [ ] Preencher `CAPTURA.id` com o formulário do provedor escolhido
-- [ ] Trocar o relato placeholder (texto e foto) por um depoimento real
 - [ ] Página de política de privacidade, linkada no rodapé
 - [ ] Domínio + analytics
